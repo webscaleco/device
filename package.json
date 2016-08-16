@@ -14,6 +14,9 @@
     "socket.io-client": "^1.3.7",
     "waterrower": "^0.4.0"
   },
+  "files":[
+    "data/simulationdata"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon index.js"

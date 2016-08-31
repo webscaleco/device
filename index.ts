@@ -18,22 +18,25 @@ console.log(`Attempting to connect to ${socketServerUrl}`);
 
 //wire up to the socket server
 var socket = io(socketServerUrl);
-socket.on("message", data => {
-    if (data.message == 'startrace') {
+// socket.on("message", data => {
+//     if (data.message == 'startrace') {
         waterrower.reset();
-        waterrower.defineDistanceWorkout(data.distance);
+        // waterrower.defineDistanceWorkout(data.distance);
         if(simulationMode) waterrower.startSimulation();
-    }
-});
+//     }
+// });
 
 //respond to the waterrower sending data
 waterrower.datapoints$.subscribe(() => {
-    socket.send({
+    let msg = {
         message: "strokedata",
         name: name,
-        distance: waterrower.requestDataPoint('distance'),
-        strokeRate: waterrower.requestDataPoint('strokes_cnt'),
-        speed: waterrower.requestDataPoint('m_s_total'),
-        clock: waterrower.requestDataPoint('display_sec')
-    });
+        distance: waterrower.readDataPoint('distance'),
+        strokeRate: waterrower.readDataPoint('strokes_cnt'),
+        speed: waterrower.readDataPoint('m_s_total'),
+        clock: waterrower.readDataPoint('display_sec')
+    };
+    console.log(msg);
+    socket.send(msg);
+    //ISSUE05: send via iothub instead of sockets
 });

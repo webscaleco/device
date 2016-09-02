@@ -1,5 +1,5 @@
-import { Observable, Subject} from 'rxjs/Rx';
-import config from './config';
+import { Observable, Subject } from 'rxjs/Rx';
+import * as config from 'config';
 import * as minimist from 'minimist';
 import * as io from 'socket.io-client';
 
@@ -9,9 +9,9 @@ import { WaterRower } from 'waterrower';
 let waterrower = new WaterRower();
 
 //command line arguments
-let name = args["n"] || args["name"] || config.name || 'Rower';
-let socketServerUrl = args["s"] || args["socket-server-url"] || config.socketServerUrl || 'http://localhost:8080';
-let simulationMode = args["m"] || args["simulation-mode"] || config.simulationMode;
+let name = args["n"] || args["name"] || (config.has('name') ? config.get('name') : undefined) || 'Rower';
+let socketServerUrl = args["s"] || args["socket-server-url"] || (config.has('socketServerUrl') ? config.get('socketServerUrl') : undefined) || 'http://localhost:8080';
+let simulationMode = args["m"] || args["simulation-mode"] || (config.has('simulationMode') ? config.get('simulationMode') : undefined);
 
 console.log(`Using ${name} as rower name.`);
 console.log(`Attempting to connect to ${socketServerUrl}`);

@@ -31,9 +31,9 @@ waterrower.datapoints$.subscribe(() => {
         message: "strokedata",
         name: name,
         distance: waterrower.readDataPoint('distance'),
-        speed: waterrower.readDataPoint('m_s_total')/100, //convert cm to m
-        speed_avg: waterrower.readDataPoint('m_s_average')/100, //convert cm to m
-        total_kcal: waterrower.readDataPoint('total_kcal')
+        m_s_total: waterrower.readDataPoint('m_s_total')/100, //convert cm to m
+        m_s_average: waterrower.readDataPoint('m_s_average')/100, //convert cm to m
+        total_kcal: waterrower.readDataPoint('total_kcal')/1000
     };
     console.log(msg);
     socket.send(msg);

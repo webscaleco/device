@@ -25,16 +25,15 @@ var socket = io(socketServerUrl);
         if(simulationMode) waterrower.startSimulation();
 //     }
 // });
-
 //respond to the waterrower sending data
 waterrower.datapoints$.subscribe(() => {
     let msg = {
         message: "strokedata",
         name: name,
         distance: waterrower.readDataPoint('distance'),
-        strokeRate: waterrower.readDataPoint('strokes_cnt'),
-        speed: waterrower.readDataPoint('m_s_total'),
-        clock: waterrower.readDataPoint('display_sec')
+        speed: waterrower.readDataPoint('m_s_total')/100, //convert cm to m
+        speed_avg: waterrower.readDataPoint('m_s_average')/100, //convert cm to m
+        total_kcal: waterrower.readDataPoint('total_kcal')
     };
     console.log(msg);
     socket.send(msg);

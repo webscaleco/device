@@ -30,7 +30,7 @@ waterrower.datapoints$.subscribe(() => {
     let msg = {
         message: "strokedata",
         name: name,
-        distance: waterrower.readDataPoint('distance'),
+        ms_distance: waterrower.readDataPoint('ms_distance'),
         m_s_total: waterrower.readDataPoint('m_s_total')/100, //convert cm to m
         m_s_average: waterrower.readDataPoint('m_s_average')/100, //convert cm to m
         total_kcal: waterrower.readDataPoint('total_kcal')/1000

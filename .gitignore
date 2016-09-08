@@ -28,7 +28,7 @@ build/Release
 node_modules
 
 #ignoring the local.json file in config
-config/local.json
+config/local*.json
 
 *.js
 *.js.map

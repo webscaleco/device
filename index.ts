@@ -3,19 +3,19 @@ import * as config from 'config';
 import * as minimist from 'minimist';
 import * as io from 'socket.io-client';
 
-var args = minimist(process.argv.slice(3));
+var args = minimist(process.argv.slice(2));
 
 //IoThub requires
 let Message = require('azure-iot-device').Message;
 let clientFromConnectionString = require('azure-iot-device-amqp').clientFromConnectionString;
 
-//We will have multiple devices in simulation pass in the -d argument for device number 1-5 are currently on IoT hub
-let deviceNumber = args["d"] || args["deviceNumber"] || (config.has('deviceNumber') ? config.get('deviceNumber') : undefined) || '1';
-//The registered device 
-var myDevice = 'regatta-dev-' + deviceNumber;
-//add deviceid to connection string to set client
-let client = clientFromConnectionString(process.env.REGATTA_DEVICE_CONNECTIONSTRING + ';DeviceId=' + myDevice;);
+//We will have multiple devices in simulation passed in the -d argument for device number (ex: waterrower1) 1-12 are currently on IoT hub
+let device = args["d"] ;
+if (config.has(device)){
+  var deviceConnectionString = config.get(device);
+}
 
+let client = clientFromConnectionString(deviceConnectionString);
 
 import { WaterRower } from 'waterrower';
 
@@ -54,7 +54,7 @@ waterrower.datapoints$.subscribe(() => {
     console.log(msg);
     socket.send(msg);
     //ISSUE05: send via iothub instead of sockets
-    var data = JSON.stringify({ deviceId: myDevice, msg });
+    var data = JSON.stringify({ deviceId: device, msg });
     let message = new Message(JSON.stringify(data));
     client.sendEvent(message, printResultFor('send'));
 

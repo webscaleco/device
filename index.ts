@@ -4,6 +4,19 @@ import * as minimist from 'minimist';
 import * as io from 'socket.io-client';
 
 var args = minimist(process.argv.slice(2));
+
+//IoThub requires
+let Message = require('azure-iot-device').Message;
+let clientFromConnectionString = require('azure-iot-device-amqp').clientFromConnectionString;
+
+//We will have multiple devices in simulation passed in the -d argument for device number (ex: waterrower1) 1-12 are currently on IoT hub
+let device = args["d"] ;
+if (config.has(device)){
+  var deviceConnectionString = config.get(device);
+}
+
+let client = clientFromConnectionString(deviceConnectionString);
+
 import { WaterRower } from 'waterrower';
 
 let waterrower = new WaterRower();
@@ -15,6 +28,9 @@ let simulationMode = args["m"] || args["simulation-mode"] || (config.has('simula
 
 console.log(`Using ${name} as rower name.`);
 console.log(`Attempting to connect to ${socketServerUrl}`);
+
+//open connection to iothub
+client.open(err => console.log(err ? 'Could not connect: ' + err : 'Client connected'));
 
 //wire up to the socket server
 var socket = io(socketServerUrl);
@@ -38,4 +54,15 @@ waterrower.datapoints$.subscribe(() => {
     console.log(msg);
     socket.send(msg);
     //ISSUE05: send via iothub instead of sockets
+    var data = JSON.stringify({ deviceId: device, msg });
+    let message = new Message(JSON.stringify(data));
+    client.sendEvent(message, printResultFor('send'));
+
+    //for testing
+        function printResultFor(op) {
+        return function printResult(err, res) {
+            if (err) console.log(op + ' error: ' + err.toString());
+            if (res) console.log(op + ' status: ' + res.constructor.name);
+        };
+    }
 });

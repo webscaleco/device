@@ -1,5 +1,6 @@
 {
     "name": "Rower",
     "socketServerUrl": "http://localhost:8080",
-    "simulationMode": false
+    "simulationMode": false,
+    "deviceNumber": "1"
 }

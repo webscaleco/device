@@ -31,7 +31,7 @@ console.log(`Attempting to connect to ${socketServerUrl}`);
 
 //open connection to iothub
 client.open(err => {
-    console.log(err ? 'Could not connect: ' + err : 'Client connected');
+    if(err) throw(`Error connecting to the Regatta service. Please check your connection. [${err}]`);
 
     //wire up to the socket server
     var socket = io(socketServerUrl);

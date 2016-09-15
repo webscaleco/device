@@ -15,6 +15,7 @@ let simulationMode = args["m"] || args["simulation-mode"] || (config.has('simula
 
 console.log(`Using ${name} as rower name.`);
 console.log(`Attempting to connect to ${socketServerUrl}`);
+if(simulationMode) console.log('This Regatta machine is running in simulation mode.');
 
 //wire up to the socket server
 var socket = io(socketServerUrl);

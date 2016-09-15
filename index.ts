@@ -6,7 +6,7 @@ import * as io from 'socket.io-client';
 var args = minimist(process.argv.slice(2));
 import { WaterRower } from 'waterrower';
 
-let waterrower = new WaterRower();
+let waterrower = new WaterRower({ datapoints: ['ms_distance', 'm_s_total', 'm_s_average', 'total_kcal'] });
 
 //command line arguments
 let name = args["n"] || args["name"] || (config.has('name') ? config.get('name') : undefined) || 'Rower';

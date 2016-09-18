@@ -32,8 +32,15 @@ socket.on("message", data => {
     }
 });
 
+let messageCount = 0;
 //respond to the waterrower sending data
 waterrower.datapoints$.subscribe(() => {
+    if (messageCount > 0) {
+        process.stdout.clearLine();
+        process.stdout.cursorTo(0);  // move cursor to beginning of line
+    }
+    messageCount++;
+
     let values = waterrower.readDataPoints(['ms_distance', 'm_s_total', 'm_s_average', 'total_kcal']);
     let msg = {
         message: "strokedata",
@@ -43,6 +50,6 @@ waterrower.datapoints$.subscribe(() => {
         m_s_average: values['m_s_average'] / 100, //convert cm to m
         total_kcal: values['total_kcal'] / 1000 //convert to calories
     };
-    console.log(msg);
+    process.stdout.write(`Messages sent: ${ messageCount }`);  // write text
     socket.send(msg);
 });

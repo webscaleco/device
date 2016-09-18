@@ -15,7 +15,7 @@ let simulationMode = args["m"] || args["simulation-mode"] || (config.has('simula
 
 console.log(`Using ${name} as rower name.`);
 console.log(`Attempting to connect to ${socketServerUrl}`);
-if(simulationMode) console.log('This Regatta machine is running in simulation mode.');
+if (simulationMode) console.log('This Regatta machine is running in simulation mode.');
 
 //wire up to the socket server
 var socket = io(socketServerUrl);
@@ -28,20 +28,20 @@ socket.on("message", data => {
     if (data.message == 'session-start') {
         waterrower.reset();
         waterrower.defineDistanceWorkout(data.distance);
-        if(simulationMode) waterrower.startSimulation();
+        if (simulationMode) waterrower.startSimulation();
     }
 });
 
 //respond to the waterrower sending data
 waterrower.datapoints$.subscribe(() => {
-    let values = waterrower.readDataPoints(['ms_distance','m_s_total','m_s_average','total_kcal']);
+    let values = waterrower.readDataPoints(['ms_distance', 'm_s_total', 'm_s_average', 'total_kcal']);
     let msg = {
         message: "strokedata",
         name: name,
         ms_distance: values['ms_distance'],
-        m_s_total: values['m_s_total']/100, //convert cm to m
-        m_s_average: values['m_s_average']/100, //convert cm to m
-        total_kcal: values['total_kcal']/1000 //convert to calories
+        m_s_total: values['m_s_total'] / 100, //convert cm to m
+        m_s_average: values['m_s_average'] / 100, //convert cm to m
+        total_kcal: values['total_kcal'] / 1000 //convert to calories
     };
     console.log(msg);
     socket.send(msg);

@@ -23,11 +23,14 @@ socket.on('connect', () => {
     //send a check-in message so the rower can be added to the list
     socket.send({ message: 'rower-checkin', name: name });
 });
+
+socket.on("message", data => {
+    if (data.message == 'session-start') {
         waterrower.reset();
-        // waterrower.defineDistanceWorkout(data.distance);
+        waterrower.defineDistanceWorkout(data.distance);
         if(simulationMode) waterrower.startSimulation();
-//     }
-// });
+    }
+});
 
 //respond to the waterrower sending data
 waterrower.datapoints$.subscribe(() => {
@@ -42,5 +45,4 @@ waterrower.datapoints$.subscribe(() => {
     };
     console.log(msg);
     socket.send(msg);
-    //ISSUE05: send via iothub instead of sockets
 });

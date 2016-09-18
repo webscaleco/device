@@ -19,8 +19,10 @@ if(simulationMode) console.log('This Regatta machine is running in simulation mo
 
 //wire up to the socket server
 var socket = io(socketServerUrl);
-// socket.on("message", data => {
-//     if (data.message == 'startrace') {
+socket.on('connect', () => {
+    //send a check-in message so the rower can be added to the list
+    socket.send({ message: 'rower-checkin', name: name });
+});
         waterrower.reset();
         // waterrower.defineDistanceWorkout(data.distance);
         if(simulationMode) waterrower.startSimulation();

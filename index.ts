@@ -4,6 +4,19 @@ import * as minimist from 'minimist';
 import * as io from 'socket.io-client';
 
 var args = minimist(process.argv.slice(2));
+
+//IoThub requires
+let Message = require('azure-iot-device').Message;
+let clientFromConnectionString = require('azure-iot-device-amqp').clientFromConnectionString;
+
+//We will have multiple devices in simulation passed in the -d argument for device number (ex: waterrower1) 1-12 are currently on IoT hub
+let device = args["d"];
+if (config.has(device)) {
+    var deviceConnectionString = config.get(device);
+}
+
+let client = clientFromConnectionString(deviceConnectionString);
+
 import { WaterRower } from 'waterrower';
 
 let waterrower = new WaterRower({ datapoints: ['ms_distance', 'm_s_total', 'm_s_average', 'total_kcal'] });

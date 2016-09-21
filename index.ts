@@ -25,6 +25,7 @@ let waterrower = new WaterRower({ datapoints: ['ms_distance', 'm_s_total', 'm_s_
 let name = args["n"] || args["name"] || (config.has('name') ? config.get('name') : undefined) || 'Rower';
 let socketServerUrl = args["s"] || args["socket-server-url"] || (config.has('socketServerUrl') ? config.get('socketServerUrl') : undefined) || 'http://localhost:8080';
 let simulationMode = args["m"] || args["simulation-mode"] || (config.has('simulationMode') ? config.get('simulationMode') : undefined);
+let autoStart = args["a"] || args["auto-start"] || (config.has('autoStart') ? config.get('autoStart') : false);
 
 console.log(`Using ${name} as rower name.`);
 console.log(`Attempting to connect to ${socketServerUrl}`);
@@ -37,13 +38,17 @@ socket.on('connect', () => {
     socket.send({ message: 'rower-checkin', name: name });
 });
 
+if (autoStart) start(150);
+
 socket.on("message", data => {
-    if (data.message == 'session-start') {
-        waterrower.reset();
-        waterrower.defineDistanceWorkout(data.distance);
-        if (simulationMode) waterrower.startSimulation();
-    }
+    if (data.message == 'session-start') start(data.distance);
 });
+
+function start(distance:number) {
+    waterrower.reset();
+    waterrower.defineDistanceWorkout(distance);
+    if (simulationMode) waterrower.startSimulation();
+}
 
 let messageCount = 0;
 //respond to the waterrower sending data
@@ -63,6 +68,6 @@ waterrower.datapoints$.subscribe(() => {
         m_s_average: values['m_s_average'] / 100, //convert cm to m
         total_kcal: values['total_kcal'] / 1000 //convert to calories
     };
-    process.stdout.write(`Messages sent: ${ messageCount }`);  // write text
+    process.stdout.write(`Messages sent: ${messageCount}`);  // write text
     socket.send(msg);
 });

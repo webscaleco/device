@@ -30,52 +30,58 @@ let autoStart = args["a"] || args["auto-start"] || (config.has('autoStart') ? co
 console.log(`Using ${name} as rower name.`);
 console.log(`Attempting to connect to ${socketServerUrl}`);
 if (simulationMode) console.log('This Regatta machine is running in simulation mode.');
-if (simulationMode) console.log('This Regatta machine is running in simulation mode.');
 
-//wire up to the socket server
-var socket = io(socketServerUrl);
-socket.on('connect', () => {
-    //send a check-in message so the rower can be added to the list
-    socket.send({ message: 'rower-checkin', name: name });
-});
+//open connection to iothub
+client.open(err => {
+    if (err) throw (`Error connecting to the Regatta service. Please check your connection. [${err}]`);
 
-if (autoStart) start(150);
+    //wire up to the socket server
+    var socket = io(socketServerUrl);
+    socket.on('connect', () => {
+        //send a check-in message so the rower can be added to the list
+        socket.send({ message: 'rower-checkin', name: name });
+    });
 
-socket.on("message", data => {
-    if (data.message == 'session-start') start(data.distance);
-});
+    if (autoStart) start(150);
 
-function start(distance:number) {
+    socket.on("message", data => {
+        if (data.message == 'session-start') start(data.distance);
+    });
+
+    function start(distance: number) {
         waterrower.reset();
-    waterrower.defineDistanceWorkout(distance);
+        waterrower.defineDistanceWorkout(distance);
         if (simulationMode) waterrower.startSimulation();
-}
-
-let messageCount = 0;
-
-//respond to the waterrower sending data
-waterrower.datapoints$.subscribe(() => {
-    if (messageCount > 0) {
-        process.stdout.clearLine();
-        process.stdout.cursorTo(0);  // move cursor to beginning of line
     }
-    messageCount++;
 
-    let values = waterrower.readDataPoints(['ms_distance', 'm_s_total', 'm_s_average', 'total_kcal']);
-    let msg = {
-        message: "strokedata",
-        name: name,
-        ms_distance: values['ms_distance'],
-        m_s_total: values['m_s_total'] / 100, //convert cm to m
-        m_s_average: values['m_s_average'] / 100, //convert cm to m
-        total_kcal: values['total_kcal'] / 1000 //convert to calories
-    };
-    process.stdout.write(`Messages sent: ${messageCount}`);  // write text
+    let messageCount = 0;
+
+    //respond to the waterrower sending data
+    waterrower.datapoints$.subscribe(() => {
+        if (messageCount > 0) {
+            process.stdout.clearLine();
+            process.stdout.cursorTo(0);  // move cursor to beginning of line
+        }
+        messageCount++;
+        process.stdout.write(`Sending message: ${messageCount}`);  // write text
+
+        let values = waterrower.readDataPoints(['ms_distance', 'm_s_total', 'm_s_average', 'total_kcal']);
+        let msg = {
+            message: "strokedata",
+            name: name,
+            ms_distance: values['ms_distance'],
+            m_s_total: values['m_s_total'] / 100, //convert cm to m
+            m_s_average: values['m_s_average'] / 100, //convert cm to m
+            total_kcal: values['total_kcal'] / 1000 //convert to calories
+        };
 
         //send sockets
-    socket.send(msg);
+        socket.send(msg);
 
         //send via iothub instead of sockets
         let message = new Message(JSON.stringify(JSON.stringify({ deviceId: device, msg })));
-        client.sendEvent(message, (err,res) => { if(err) console.log('Error sending to IoT Hub');});
+        client.sendEvent(message, (err, res) => {
+            if (err) console.log(`Error sending to IoT Hub (${err})`);
+        });
+    });
 });

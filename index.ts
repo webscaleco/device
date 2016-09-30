@@ -6,6 +6,7 @@ import * as io from 'socket.io-client';
 var args = minimist(process.argv.slice(2));
 
 //IoThub requires
+//add comments here
 let Message = require('azure-iot-device').Message;
 let clientFromConnectionString = require('azure-iot-device-amqp').clientFromConnectionString;
 

@@ -30,6 +30,7 @@ let autoStart = args["a"] || args["auto-start"] || (config.has('autoStart') ? co
 console.log(`Using ${name} as rower name.`);
 console.log(`Attempting to connect to ${socketServerUrl}`);
 if (simulationMode) console.log('This Regatta machine is running in simulation mode.');
+if (simulationMode) console.log('This Regatta machine is running in simulation mode.');
 
 //wire up to the socket server
 var socket = io(socketServerUrl);
@@ -45,12 +46,13 @@ socket.on("message", data => {
 });
 
 function start(distance:number) {
-    waterrower.reset();
+        waterrower.reset();
     waterrower.defineDistanceWorkout(distance);
-    if (simulationMode) waterrower.startSimulation();
+        if (simulationMode) waterrower.startSimulation();
 }
 
 let messageCount = 0;
+
 //respond to the waterrower sending data
 waterrower.datapoints$.subscribe(() => {
     if (messageCount > 0) {
@@ -69,5 +71,11 @@ waterrower.datapoints$.subscribe(() => {
         total_kcal: values['total_kcal'] / 1000 //convert to calories
     };
     process.stdout.write(`Messages sent: ${messageCount}`);  // write text
+
+        //send sockets
     socket.send(msg);
+
+        //send via iothub instead of sockets
+        let message = new Message(JSON.stringify(JSON.stringify({ deviceId: device, msg })));
+        client.sendEvent(message, (err,res) => { if(err) console.log('Error sending to IoT Hub');});
 });

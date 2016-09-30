@@ -73,18 +73,12 @@ client.open(err => {
             total_kcal: values['total_kcal'] / 1000 //convert to calories
         };
         process.stdout.write(`Messages sent: ${messageCount}`);  // write text
-        socket.send(msg);
-        //ISSUE05: send via iothub instead of sockets
-        var data = JSON.stringify({ deviceId: device, msg });
-        let message = new Message(JSON.stringify(data));
-        client.sendEvent(message, printResultFor('send'));
 
-        //for testing
-        function printResultFor(op) {
-            return function printResult(err, res) {
-                if (err) console.log(op + ' error: ' + err.toString());
-                if (res) console.log(op + ' status: ' + res.constructor.name);
-            };
-        }
+        //send sockets
+        socket.send(msg);
+
+        //send via iothub instead of sockets
+        let message = new Message(JSON.stringify(JSON.stringify({ deviceId: device, msg })));
+        client.sendEvent(message, (err,res) => { if(err) console.log('Error sending to IoT Hub');});
     });
 });

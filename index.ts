@@ -31,12 +31,13 @@ console.log(`Using ${name} as rower name.`);
 console.log(`Attempting to connect to ${socketServerUrl}`);
 if (simulationMode) console.log('This Regatta machine is running in simulation mode.');
 
-//open connection to iothub
+//We dont want to do anything unitl we open connection to iothub
 client.open(err => {
     if (err) throw (`Error connecting to the Regatta service. Please check your connection. [${err}]`);
 
     //wire up to the socket server
     var socket = io(socketServerUrl);
+    //sending out socket message here ---
     socket.on('connect', () => {
         //send a check-in message so the rower can be added to the list
         socket.send({ message: 'rower-checkin', name: name });
@@ -44,20 +45,27 @@ client.open(err => {
 
     if (autoStart) start(150);
 
+
+    // Socket message COMING from UI via the API
     socket.on("message", data => {
         if (data.message == 'session-start') start(data.distance);
     });
 
+    //resets the waterrower monitor S4
+    //these go to waterrower module with talks to the waterrower S4 to reset
     function start(distance: number) {
         waterrower.reset();
         waterrower.defineDistanceWorkout(distance);
         if (simulationMode) waterrower.startSimulation();
     }
 
+    // Just for showing messagecount in console
     let messageCount = 0;
 
     //respond to the waterrower sending data
+    //subscibing to the datapoints stream
     waterrower.datapoints$.subscribe(() => {
+        //this is all just to rewrite the message on the console and rewrite over it
         if (messageCount > 0) {
             process.stdout.clearLine();
             process.stdout.cursorTo(0);  // move cursor to beginning of line
@@ -65,6 +73,7 @@ client.open(err => {
         messageCount++;
         process.stdout.write(`Sending message: ${messageCount}`);  // write text
 
+        //We only want to read these four datapoints. 
         let values = waterrower.readDataPoints(['ms_distance', 'm_s_total', 'm_s_average', 'total_kcal']);
         let msg = {
             message: "strokedata",

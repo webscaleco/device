@@ -6,10 +6,15 @@ import * as io from 'socket.io-client';
 var args = minimist(process.argv.slice(2));
 
 //IoThub requires
-let Message = require('azure-iot-device').Message;
+//setting up IoT hub to use the  Advanced Message Queuing Protocol 
 let clientFromConnectionString = require('azure-iot-device-amqp').clientFromConnectionString;
 
-//We will have multiple devices in simulation passed in the -d argument for device number (ex: waterrower1) 1-12 are currently on IoT hub
+//Creating a message object to use later 
+let Message = require('azure-iot-device').Message;
+
+//We will have multiple devices in simulation passed in the -d argument for device number 
+//(ex: waterrower1) 1-12 are currently on IoT hub
+
 let device = args["d"];
 if (config.has(device)) {
     var deviceConnectionString = config.get(device);

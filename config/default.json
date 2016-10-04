@@ -1,5 +1,4 @@
 {
     "name": "Rower",
-    "socketServerUrl": "http://localhost:8080",
-    "simulationMode": false
+    "socketServerUrl": "http://regatta-api.azurewebsites.net"
 }
